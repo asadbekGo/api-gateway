@@ -9,6 +9,7 @@ type QueryParams struct {
 	Filters  map[string]string
 	Page     int64
 	Limit    int64
+	ListTime string
 	Ordering []string
 	Search   string
 }
@@ -18,6 +19,7 @@ func ParseQueryParams(queryParams map[string][]string) (*QueryParams, []string) 
 		Filters:  make(map[string]string),
 		Page:     1,
 		Limit:    10,
+		ListTime: "2000-00-00",
 		Ordering: []string{},
 		Search:   "",
 	}
@@ -37,6 +39,14 @@ func ParseQueryParams(queryParams map[string][]string) (*QueryParams, []string) 
 			params.Limit, err = strconv.ParseInt(value[0], 10, 64)
 			if err != nil {
 				errStr = append(errStr, "Invalid `limit` param")
+			}
+			continue
+		}
+
+		if key == "listTime" {
+			params.ListTime = value[0]
+			if err != nil {
+				errStr = append(errStr, "Invalid `listTime` param")
 			}
 			continue
 		}
