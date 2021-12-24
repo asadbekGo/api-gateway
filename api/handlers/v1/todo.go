@@ -2,20 +2,29 @@ package v1
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"google.golang.org/protobuf/encoding/protojson"
 
+	_ "github.com/asadbekGo/api-gateway/api/docs" //swag
 	pb "github.com/asadbekGo/api-gateway/genproto"
 	l "github.com/asadbekGo/api-gateway/pkg/logger"
 	"github.com/asadbekGo/api-gateway/pkg/utils"
 )
 
-// CreateTodo creates Todo
-// route /v1/todos [post]
+// CreateTodo ...
+// @Summary CreateTodo
+// @Description This API for creating a new todo
+// @Tags todo
+// @Accept json
+// @Produce json
+// @Param Todo request body models.Todo true "todoCreateRequest"
+// @Success 200 {object} models.Todo
+// @Success 400 {object} models.StandardErrorModel
+// @Success 500 {object} models.StandardErrorModel
+// @Router /v1/todos/ [post]
 func (h *handlerV1) CreateTodo(c *gin.Context) {
 	var (
 		body        pb.Todo
@@ -45,8 +54,17 @@ func (h *handlerV1) CreateTodo(c *gin.Context) {
 	c.JSON(http.StatusCreated, repsonse)
 }
 
-// GetTodo gets todo by id
-// route /v1/todos/{id} [get]
+// GetTodo ...
+// @Summary GetTodo
+// @Description This API for getting todo detail
+// @Tags todo
+// @Accept json
+// @Produce json
+// @Param id path string true "Id"
+// @Success 200 {object} models.Todo
+// @Success 400 {object} models.StandardErrorModel
+// @Success 500 {object} models.StandardErrorModel
+// @Router /v1/todos/{id} [get]
 func (h *handlerV1) GetTodo(c *gin.Context) {
 	var jspbMarshal protojson.MarshalOptions
 	jspbMarshal.UseProtoNames = true
@@ -70,8 +88,18 @@ func (h *handlerV1) GetTodo(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-// ListTodos returns list of todos
-// route /v1/todos/ [get]
+// ListTodos ...
+// @Summary ListTodos
+// @Description This API for getting list of todos
+// @Tags todo
+// @Accept json
+// @Produce json
+// @Param page query string false "Page"
+// @Param limit query string false "Limit"
+// @Success 200 {object} models.ListTodos
+// @Success 400 {object} models.StandardErrorModel
+// @Success 500 {object} models.StandardErrorModel
+// @Router /v1/todos [get]
 func (h *handlerV1) ListTodos(c *gin.Context) {
 	queryParams := c.Request.URL.Query()
 
@@ -106,8 +134,18 @@ func (h *handlerV1) ListTodos(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-// UpdateTodo updates todo by id
-// route /v1/todos/{id} [put]
+// UpdateTodo ...
+// @Summary UpdateTodo
+// @Description This API for updating todo
+// @Tags todo
+// @Accept json
+// @Produce json
+// @Param id path string true "Id"
+// @Param Todo request body models.UpdateTodo true "todoUpdateRequest"
+// @Success 200 {object} models.Todo
+// @Success 400 {object} models.StandardErrorModel
+// @Success 500 {object} models.StandardErrorModel
+// @Router /v1/todos/{id} [put]
 func (h *handlerV1) UpdateTodo(c *gin.Context) {
 	var (
 		body        pb.Todo
@@ -140,8 +178,17 @@ func (h *handlerV1) UpdateTodo(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-// DeleteTodo deletes todo by id
-// route /v1/todos/{id} [delete]
+// DeleteTodo ...
+// @Summary DeleteTodo
+// @Description This API for deleting todo
+// @Tags todo
+// @Accept json
+// @Produce json
+// @Param id path string true "Id"
+// @Success 200
+// @Success 400 {object} models.StandardErrorModel
+// @Success 500 {object} models.StandardErrorModel
+// @Router /v1/todos/{id} [delete]
 func (h *handlerV1) DeleteTodo(c *gin.Context) {
 	var jspbMarshal protojson.MarshalOptions
 	jspbMarshal.UseProtoNames = true
@@ -165,8 +212,19 @@ func (h *handlerV1) DeleteTodo(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-// ListOverdue returns listoverdue of todo
-// route /v1/todoListOverdue/
+// ListOverdueTodo ...
+// @Summary ListOverdueTodo
+// @Description This API for getting listOverdue of todo
+// @Tags todo
+// @Accept json
+// @Produce json
+// @Param page query string false "Page"
+// @Param limit query string false "Limit"
+// @Param listTime query string true "ListTime"
+// @Success 200 {object} models.ListTodos
+// @Success 400 {object} models.StandardErrorModel
+// @Success 500 {object} models.StandardErrorModel
+// @Router /v1/todoListOverdue [get]
 func (h *handlerV1) ListOverdueTodo(c *gin.Context) {
 	queryParams := c.Request.URL.Query()
 
@@ -179,23 +237,8 @@ func (h *handlerV1) ListOverdueTodo(c *gin.Context) {
 		return
 	}
 
-	var (
-		body struct {
-			ListTime string `json:"listTime"`
-		}
-		jspbMarshal protojson.MarshalOptions
-	)
+	var jspbMarshal protojson.MarshalOptions
 	jspbMarshal.UseProtoNames = true
-
-	err := c.ShouldBindJSON(&body)
-	fmt.Println(body.ListTime)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
-		h.log.Error("failed to bind json", l.Error(err))
-		return
-	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(h.cfg.CtxTimeout))
 	defer cancel()
@@ -206,7 +249,7 @@ func (h *handlerV1) ListOverdueTodo(c *gin.Context) {
 				Limit: params.Limit,
 				Page:  params.Page,
 			},
-			ToTime: body.ListTime,
+			ToTime: params.ListTime,
 		})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{

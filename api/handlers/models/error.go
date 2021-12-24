@@ -1,4 +1,4 @@
-package handlers
+package models
 
 // Error ...
 type Error struct {

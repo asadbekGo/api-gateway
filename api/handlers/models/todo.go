@@ -1,4 +1,4 @@
-package handlers
+package models
 
 type Todo struct {
 	ID        string `json:"id"`
